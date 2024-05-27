@@ -13,9 +13,10 @@ class Match(models.Model):
     def __str__(self):
         return f'{self.player1} vs {self.player2}'
 
+
 class Tournament(models.Model):
     name = models.CharField(max_length=100)
-    players = models.ManyToManyField()
+    players = models.ManyToManyField(User, on_delete=models.CASCADE)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField()
     time = models.TimeField()
@@ -24,6 +25,7 @@ class Tournament(models.Model):
         ('ongoing', 'Ongoing'),
         ('completed', 'Completed'),
     ]
+    matches = models.ManyToManyField(Match, on_delete=models.CASCADE)
     status = models.CharField(choices=status_choices, default='upcoming', max_length=50)
 
     def __str__(self):
