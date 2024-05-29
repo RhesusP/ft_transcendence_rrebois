@@ -7,6 +7,10 @@ ft_transcendence
 {% block body %}
 {% if user.is_authenticated %}
 <p>Hello {{user.username}} 😳👉👈</p>
+<button id="gamePracticeButton" >
+    Game Practice
+</button>
+
 {% else %}
 <div class="w-100 h-100 d-flex justify-content-center align-items-center">
     <form action="{% url 'login' %}" method="post"
