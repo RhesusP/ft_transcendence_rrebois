@@ -9,19 +9,23 @@ ft_transcendence
     <script src="{% static 'forgotPW.js' %}"></script>
     <script src="{% static 'userProfile.js' %}"></script>
     <script src="{% static 'userDataPage.js' %}"></script>
+    <script src="{% static 'login.js' %}"></script>
 {% endblock %}
 
 {% block body %}
 
-{% if user.is_authenticated %}
+<!--{% if user.is_authenticated %}-->
 
-<div id="greetings">Hello {{user.username}} 😳👉👈</div>
+<div id="authenticatedContent">
+    <div id="greetings">Hello {{user.username}} 😳👉👈</div>
 
-<div class="container" id="friendsDiv"></div>
-<div class="container" id="statsDiv"></div>
-<div class="container" id="userDataDiv"></div>
+    <div class="container" id="friendsDiv"></div>
+    <div class="container" id="statsDiv"></div>
+    <div class="container" id="userDataDiv"></div>
+</div>
 
-{% else %}
+<!--{% else %}-->
+
 <div class="w-100 h-100 d-flex justify-content-center align-items-center" id="divLoginForm">
     <form action="{% url 'login' %}" method="post"
           class="bg-white d-flex flex-column align-items-center py-2 px-5 rounded login-card"
@@ -71,8 +75,6 @@ ft_transcendence
         </a>
         <a href="{% url 'register' %}" class="text-decoration-none">Don't have an account? Register here.</a>
     </form>
-
-
 </div>
 {% endif %}
 {% endblock %}

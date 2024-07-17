@@ -90,18 +90,38 @@ class LoginView(APIView):
             user.status = 'online'
             user.save()
 
-            response = HttpResponseRedirect(reverse("index"))
+            # response = HttpResponseRedirect(reverse("index"))
+            response = JsonResponse({
+                'message': 'Login successful',
+                'user_id': user.id,
+                'username': user.username,
+                'is_authenticated': True,
+                'redirect': True,
+                'redirect_url': ""
+            }, status=status.HTTP_200_OK)
             response.set_cookie(key='jwt_access', value=access_token, httponly=True,  samesite='Lax', secure=True, path='/')
             response.set_cookie(key='jwt_refresh', value=refresh_token, httponly=True, samesite='Lax', secure=True, path='/')
             response.set_cookie(key='csrftoken', value=get_token(request), samesite='Lax', secure=True, path='/')
+            response.status = status.HTTP_200_OK
             return response
         except AuthenticationFailed as e:
             messages.warning(request, str(e))
-            return HttpResponseRedirect(reverse("index"))
+            # return HttpResponseRedirect(reverse("index"))
+            return JsonResponse({
+                'message': str(e),
+                'is_authenticated': False,
+                'redirect': True,
+                'redirect_url': ""
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
     def get(self, request):
-        return HttpResponseRedirect(reverse("index"))
-
+        # return HttpResponseRedirect(reverse("index"))
+        return JsonResponse({
+            'is_authenticated': request.user.is_authenticated,
+            'username': request.user.username if request.user.is_authenticated else None,
+            'redirect': True,
+            'redirect_url': ""
+        })
 
 @method_decorator(csrf_protect, name='dispatch')
 class Login42View(APIView):
