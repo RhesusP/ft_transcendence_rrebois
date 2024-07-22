@@ -4,7 +4,7 @@ from .views import *
 from . import consumers
 
 websocket_urlpatterns = [
-    re_path(r'ws/user/$', consumers.UserConsumer.as_asgi()),
+    re_path(r'ws/user/', consumers.UserConsumer.as_asgi()),
 ]
 
 urlpatterns = [
@@ -33,6 +33,7 @@ urlpatterns = [
     path('get_friends', GetFriendView.as_view(), name='get_friends'),
     path('remove_friend', RemoveFriendView.as_view(), name='remove_friend'),
     path('verifyotp', VerifyOTPView.as_view(), name='verify_otp'),
+    path('get_ws_token/', views.get_ws_token, name='get_ws_token'),
     # path('disable_2FA', Disable2FAView.as_view(), name='disable_2FA'),
 ]
 

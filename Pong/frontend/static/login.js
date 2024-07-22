@@ -18,7 +18,7 @@ function initializeWebSocket() {
     return socket;
 }
 
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-pwd').value;
@@ -32,12 +32,23 @@ function handleLogin(event) {
         body: JSON.stringify({ username, password }),
     })
     .then(response => response.json())
-    .then(data => {
+    .then(async data => {
         if (data.is_authenticated) {
             document.getElementById('divLoginForm').style.display = 'none';
             // document.getElementById('authenticatedContent').style.display = 'block';
 
-            const socket = new WebSocket('ws://' + window.location.host + '/ws/user/');
+            const response = await fetch('/get_ws_token/');
+            const jwt = await response.json();
+            if (response.ok) {
+                const token = jwt.token
+                const ws_url = 'wss://' + window.location.host + '/ws/user/' + '?token=' + token;
+                console.log('Attempting to connect to WebSocket at:', ws_url);
+                const socket = new WebSocket('wss://' + window.location.host + '/ws/user/' + '?token=${jwt.token}');
+
+            } else {
+                console.error('Failed to get WebSocket token');
+                }
+
         } else if (data.otp_required) {
             showOTPForm(data.user_id);
         } else {
@@ -47,10 +58,18 @@ function handleLogin(event) {
     .catch(error => console.error('Error:', error));
 }
 
+// function getCookie(name) {
+//     const value = `; ${document.cookie}`;
+//     const parts = value.split(`; ${name}=`);
+//     console.log("cookie is: ", value);
+//     if (parts.length === 2) return parts.pop().split(';').shift();
+// }
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
+        console.log("cookie is: ", cookies);
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
             if (cookie.substring(0, name.length + 1) === (name + '=')) {

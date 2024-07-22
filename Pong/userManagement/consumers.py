@@ -1,16 +1,20 @@
+import logging
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.contrib.auth.models import AnonymousUser
 from .views import authenticate_user
+from .models import User
 import json
 
 class UserConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.user = await self.get_user()
-        if self.user.is_authenticated:
-            await self.accept()
-            await self.channel_layer.group_add(f"user_{self.user.id}", self.channel_name)
-        else:
+        user = self.scope["user"]
+        logging.debug(f"User is {str(self.scope['user'])}")
+        if user.is_anonymous:
             await self.close()
+        else:
+            await self.accept()
 
     async def disconnect(self, close_code):
         if hasattr(self, 'user') and self.user.is_authenticated:
@@ -27,5 +31,8 @@ class UserConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def get_user(self):
-        return authenticate_user(self.scope['headers'])
+    def get_user(self, user_id):
+        try:
+            return User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return AnonymousUser()

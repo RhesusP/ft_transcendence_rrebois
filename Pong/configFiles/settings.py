@@ -81,13 +81,18 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'configFiles.wsgi.application'
+WSGI_APPLICATION = 'configFiles.wsgi.application'
 ASGI_APPLICATION = 'configFiles.asgi.application'
+
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
-    }
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [REDIS_URL],
+        },
+    },
 }
 
 # Database
