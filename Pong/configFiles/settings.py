@@ -59,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'userManagement.middleware.JWTAuthenticationMiddleware',
+    # 'userManagement.middleware.JWTAuthWSMiddleware',
 ]
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost:8080", "https://localhost:8443"]
@@ -128,8 +129,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# LOGIN_REDIRECT_URL = "index"
-# LOGOUT_REDIRECT_URL = "index"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

@@ -14,7 +14,6 @@ function initializeWebSocket() {
     socket.onclose = function(e) {
         console.log('WebSocket connection closed');
     };
-
     return socket;
 }
 
@@ -41,10 +40,10 @@ async function handleLogin(event) {
             const jwt = await response.json();
             if (response.ok) {
                 const token = jwt.token
-                const ws_url = 'wss://' + window.location.host + '/ws/user/' + '?token=' + token;
+                const wsSelect = window.location.protocol === "https:" ? "wss://" : "ws://";
+                const ws_url = wsSelect + window.location.host + '/ws/user/' + '?token=' + token;
                 console.log('Attempting to connect to WebSocket at:', ws_url);
-                const socket = new WebSocket('wss://' + window.location.host + '/ws/user/' + '?token=${jwt.token}');
-
+                const socket = new WebSocket(wsSelect + window.location.host + '/ws/user/' + '?token=' + token);
             } else {
                 console.error('Failed to get WebSocket token');
                 }

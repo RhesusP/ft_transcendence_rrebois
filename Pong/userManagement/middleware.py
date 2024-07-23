@@ -3,13 +3,13 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from rest_framework.exceptions import AuthenticationFailed
 from channels.middleware import BaseMiddleware
+from channels.db import database_sync_to_async
 from .views import authenticate_user
 from .models import User
 import jwt
 import logging
 
-logger = logging.getLogger('userManagement')
-
+logger = logging.getLogger(__name__)
 
 class JWTAuthenticationMiddleware(MiddlewareMixin):
     def process_request(self, request):
@@ -30,43 +30,15 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
             logger.debug("JWT cookie not found, setting user as AnonymousUser")
 
 
-class JWTAuthMiddlewareStack(BaseMiddleware):
-    # async def __call__(self, scope, receive, send):
-    #     # Get the token from the query string
-    #     query_string = scope.get('query_string', b'').decode()
-    #     token = None
-    #     for param in query_string.split('&'):
-    #         if param.startswith('token='):
-    #             token = param.split('=')[1]
-    #             break
-    #
-    #     if not token:
-    #         # If no token in query string, check headers
-    #         headers = dict(scope['headers'])
-    #         if b'authorization' in headers:
-    #             try:
-    #                 token_name, token_key = headers[b'authorization'].decode().split()
-    #                 if token_name == 'Bearer':
-    #                     token = token_key
-    #             except ValueError:
-    #                 token = None
-    #
-    #     if token:
-    #         try:
-    #             # Decode the JWT
-    #             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-    #             user_id = payload.get('id')
-    #             user = await self.get_user(user_id)
-    #             scope['user'] = user
-    #         except jwt.ExpiredSignatureError:
-    #             scope['user'] = AnonymousUser()
-    #         except jwt.InvalidTokenError:
-    #             scope['user'] = AnonymousUser()
-    #     else:
-    #         scope['user'] = AnonymousUser()
-    #
-    #     return await super().__call__(scope, receive, send)
+# class JWTAuthWSMiddleware:
+#
+
+class JWTAuthWSMiddleware:
+    def __init__(self, app):
+        self.app = app
+
     async def __call__(self, scope, receive, send):
+        logger.debug("JWTAuthWSMiddleware called")
         query_string = scope["query_string"].decode()
         params = dict(qp.split("=") for qp in query_string.split("&") if "=" in qp)
         token = params.get("token", None)
@@ -77,11 +49,23 @@ class JWTAuthMiddlewareStack(BaseMiddleware):
                 user_id = payload.get('user_id')
                 user = await self.get_user(user_id)
                 scope['user'] = user
+                logger.debug(f"Authenticated user: {user.username}")
             except jwt.ExpiredSignatureError:
+                logger.debug("Token expired")
                 scope['user'] = AnonymousUser()
             except jwt.InvalidTokenError:
+                logger.debug("Invalid token")
                 scope['user'] = AnonymousUser()
         else:
+            logger.debug("No token provided")
             scope['user'] = AnonymousUser()
 
-        return await super().__call__(scope, receive, send)
+        return await self.app(scope, receive, send)
+
+
+    @database_sync_to_async
+    def get_user(self, user_id):
+        try:
+            return User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return AnonymousUser()

@@ -3,9 +3,9 @@ from . import views
 from .views import *
 from . import consumers
 
-websocket_urlpatterns = [
-    re_path(r'ws/user/', consumers.UserConsumer.as_asgi()),
-]
+# websocket_urlpatterns = [
+#     re_path(r'ws/user/$', consumers.UserConsumer.as_asgi()),
+# ]
 
 urlpatterns = [
     path("", views.index, name="index"),
